@@ -8,17 +8,13 @@ ENV HOME=/home/${USER_NAME}
 ENV ATOM_VERSION=v1.18.0
 ENV ATOM_PACKAGE=atom-amd64.deb
 
-WORKDIR ${HOME}
-
-COPY ${ATOM_PACKAGE} /tmp/
-#RUN curl -L https://github.com/atom/atom/releases/download/${ATOM_VERSION}/${ATOM_PACKAGE} > /tmp/${ATOM_PACKAGE} && \
+#COPY ${ATOM_PACKAGE} /tmp/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates \
     fakeroot \
     gconf2 \
     gconf-service \
-    git \
     gvfs-bin \
     libasound2 \
     libcap2 \
@@ -30,18 +26,20 @@ RUN apt-get update && \
     libxss1 \
     libxtst6 \
     xdg-utils && \
+    curl -L https://github.com/atom/atom/releases/download/${ATOM_VERSION}/${ATOM_PACKAGE} > /tmp/${ATOM_PACKAGE} && \
     dpkg -i /tmp/${ATOM_PACKAGE} && \
     rm -f /tmp/${ATOM_PACKAGE} && \
-    apm install language-docker
+    useradd -d /home/atom -m atom
+
+USER ${USER_NAME}
+WORKDIR ${HOME}
 
 RUN \
     mkdir -p ${HOME}/workspace  && \
-    useradd -d /home/atom -m atom
+    apm install language-docker
 
 VOLUME ${HOME}/workspace
 VOLUME ${HOME}/.atom 
-
-USER ${USER_NAME}
 
 CMD ["/usr/bin/atom","-f"]
 
