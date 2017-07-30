@@ -1,0 +1,16 @@
+version: '3' 
+services:
+  docker-nebteans:
+    image: openkbs/atom-docker
+    build:
+      context: ./Dockerfile
+    container_name: docker-atom-docker
+    environment:
+      - USER_ID=${USER_ID:-1100}
+      - GROUP_ID=${GROUP_ID:-1100}
+    env_file:
+      - ./docker.env
+    volumes:
+      - ./.atom-docker:/home/developer/.atom-docker
+      - ./workspace:/home/developer/workspace
+
