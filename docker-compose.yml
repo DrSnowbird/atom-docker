@@ -1,16 +1,17 @@
 version: '3' 
 services:
-  docker-nebteans:
-    image: openkbs/atom-docker
+  atom-java-mvn-python3:
+    image: openkbs/atom-java-mvn-python3
     build:
       context: ./Dockerfile
-    container_name: docker-atom-docker
+    container_name: atom-java-mvn-python3
     environment:
-      - USER_ID=${USER_ID:-1100}
-      - GROUP_ID=${GROUP_ID:-1100}
+      - USER_ID=${USER_ID:-1000}
+      - GROUP_ID=${GROUP_ID:-1000}
     env_file:
       - ./docker.env
     volumes:
-      - ./.atom-docker:/home/developer/.atom-docker
-      - ./workspace:/home/developer/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${HOME}/.atom-docker:/home/developer/.atom-docker
+      - ${HOME}/data-docker/atom-java-mvn-python3/workspace:/home/developer/workspace
 

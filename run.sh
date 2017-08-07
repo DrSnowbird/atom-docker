@@ -31,8 +31,8 @@ PACKAGE=`echo ${imageTag##*/}|tr "/\-: " "_"`
 
 docker_volume_data1=/home/developer/.atom
 docker_volume_data2=/home/developer/workspace
-local_docker_data1=${baseDataFolder}/${PACKAGE}/.atom
-local_docker_data2=${baseDataFolder}/${PACKAGE}/workspace
+local_docker_data1=$HOME/.atom
+local_docker_data2=${baseDataFolder}/$(basename ${imageTag##*/})/workspace
 
 #### ---- local data folders on the host ----
 mkdir -p ${local_docker_data1}
