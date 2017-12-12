@@ -1,11 +1,13 @@
-FROM openkbs/jre-mvn-py3-x11
+FROM openkbs/jdk-mvn-py3-x11
 
 MAINTAINER DrSnowbird "DrSnowbird@openkbs.org"
+
+# Release: https://github.com/atom/atom/releases/
 
 ## ---- USER_NAME is defined in parent image: openkbs/jre-mvn-py3-x11 already ----
 ENV USER_NAME=${USER_NAME:-developer}
 ENV HOME=/home/${USER_NAME}
-ENV ATOM_VERSION=v1.18.0
+ENV ATOM_VERSION=v1.23.0
 ENV ATOM_PACKAGE=atom-amd64.deb
 
 #COPY ${ATOM_PACKAGE} /tmp/
