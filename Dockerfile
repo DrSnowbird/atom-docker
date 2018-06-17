@@ -7,7 +7,7 @@ MAINTAINER DrSnowbird "DrSnowbird@openkbs.org"
 ## ---- USER_NAME is defined in parent image: openkbs/jdk-mvn-py3-x11 already ----
 ENV USER_NAME=${USER_NAME:-developer}
 ENV HOME=/home/${USER_NAME}
-ENV ATOM_VERSION=${ATOM_VERSION:-v1.26.1}
+ENV ATOM_VERSION=${ATOM_VERSION:-v1.27.2}
 ENV ATOM_PACKAGE=${ATOM_PACKAGE:-atom-amd64.deb}
 
 #COPY ${ATOM_PACKAGE} /tmp/
@@ -38,7 +38,7 @@ WORKDIR ${HOME}
 
 RUN \
     mkdir -p ${HOME}/workspace  && \
-    apm install language-docker
+    apm install language-docker atom-django
 
 VOLUME ${HOME}/workspace
 VOLUME ${HOME}/.atom 
