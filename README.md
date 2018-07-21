@@ -1,6 +1,6 @@
 # atom-docker
 
-* Atom + Java 8 (1.8.0_162) JDK + Maven 3.5.0 + Python 3.5.2 + X11 (display GUI)
+* Atom (1.28.2)+ Java 8 (1.8.0_181) JDK + Maven 3.5.0 + Python 3.5.2 + X11 (display GUI)
 
 ## Requirements
 * Docker 1.13.1+ or latest 17.12.1-ce 
@@ -11,7 +11,7 @@
 ./run.sh
 ```
 
-## Build
+## (Optional) Build
 Build your local images - instead of pulling from openkbs/intellij-docker to run
 ```
 ./build.sh
