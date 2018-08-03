@@ -7,12 +7,12 @@ MAINTAINER DrSnowbird "DrSnowbird@openkbs.org"
 ## ---- USER_NAME is defined in parent image: openkbs/jdk-mvn-py3-x11 already ----
 ENV USER_NAME=${USER_NAME:-developer}
 ENV HOME=/home/${USER_NAME}
-ENV ATOM_VERSION=${ATOM_VERSION:-v1.28.2}
+ENV ATOM_VERSION=${ATOM_VERSION:-v1.29.0}
 ENV ATOM_PACKAGE=${ATOM_PACKAGE:-atom-amd64.deb}
 
 #COPY ${ATOM_PACKAGE} /tmp/
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN sudo apt-get update && \
+    sudo apt-get install -y --no-install-recommends \
     ca-certificates \
     fakeroot \
     gconf2 \
@@ -29,9 +29,9 @@ RUN apt-get update && \
     libxtst6 \
     xdg-utils && \
     curl -L https://github.com/atom/atom/releases/download/${ATOM_VERSION}/${ATOM_PACKAGE} > /tmp/${ATOM_PACKAGE} && \
-    dpkg -i /tmp/${ATOM_PACKAGE} && \
+    sudo dpkg -i /tmp/${ATOM_PACKAGE} && \
     rm -f /tmp/${ATOM_PACKAGE} && \
-    useradd -d /home/atom -m atom
+    sudo useradd -d /home/atom -m atom
 
 USER ${USER_NAME}
 WORKDIR ${HOME}
