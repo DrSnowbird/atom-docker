@@ -7,7 +7,8 @@ MAINTAINER DrSnowbird "DrSnowbird@openkbs.org"
 ## ---- USER_NAME is defined in parent image: openkbs/jdk-mvn-py3-x11 already ----
 ENV USER_NAME=${USER_NAME:-developer}
 ENV HOME=/home/${USER_NAME}
-ENV ATOM_VERSION=${ATOM_VERSION:-v1.29.0}
+ARG ATOM_VERSION=${ATOM_VERSION:-v1.30.0}
+ENV ATOM_VERSION=${ATOM_VERSION}
 ENV ATOM_PACKAGE=${ATOM_PACKAGE:-atom-amd64.deb}
 
 #COPY ${ATOM_PACKAGE} /tmp/

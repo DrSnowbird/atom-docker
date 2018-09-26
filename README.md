@@ -30,16 +30,18 @@ More resource in X11 display of Eclipse on your host machine's OS, please see
 * [X11 Display problem](https://askubuntu.com/questions/871092/failed-to-connect-to-mir-failed-to-connect-to-server-socket-no-such-file-or-di)
 * [X11 Display with Xhost](http://www.ethicalhackx.com/fix-gtk-warning-cannot-open-display/)
 
-# Other Docker-based IDE
+# See Also - Other docker-based IDE
+* [openkbs/docker-atom-editor](https://hub.docker.com/r/openkbs/docker-atom-editor/)
+* [openkbs/eclipse-photon-docker](https://hub.docker.com/r/openkbs/eclipse-photon-docker/)
 * [openkbs/eclipse-oxygen-docker](https://hub.docker.com/r/openkbs/eclipse-oxygen-docker/)
 * [openkbs/intellj-docker](https://hub.docker.com/r/openkbs/intellij-docker/)
+* [openkbs/netbeans9-docker](https://hub.docker.com/r/openkbs/netbeans9-docker/)
 * [openkbs/netbeans](https://hub.docker.com/r/openkbs/netbeans/)
+* [openkbs/papyrus-sysml-docker](https://hub.docker.com/r/openkbs/papyrus-sysml-docker/)
 * [openkbs/pycharm-docker](https://hub.docker.com/r/openkbs/pycharm-docker/)
 * [openkbs/scala-ide-docker](https://hub.docker.com/r/openkbs/scala-ide-docker/)
+* [openkbs/sublime-docker](https://hub.docker.com/r/openkbs/sublime-docker/)
 * [openkbs/webstorm-docker](https://hub.docker.com/r/openkbs/webstorm-docker/)
-* [openkbs/atom-java-mvn-python3](https://hub.docker.com/r/openkbs/atom-java-mvn-python3/)
-* [openkbs/docker-atom-editor](https://hub.docker.com/r/openkbs/docker-atom-editor/)
-* [openkbs/protege-docker-x11](https://hub.docker.com/r/openkbs/pycharm-docker/)
 
 # Reference
 * [Atom](https://atom.io/)
