@@ -3,7 +3,8 @@ services:
   atom-java-mvn-python3:
     image: openkbs/atom-java-mvn-python3
     build:
-      context: ./Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: atom-java-mvn-python3
     environment:
       - USER_ID=${USER_ID:-1000}
