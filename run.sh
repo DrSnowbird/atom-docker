@@ -9,6 +9,17 @@ if [ $# -lt 1 ]; then
     echo "  ${0} ls -al "
 fi
 
+###########################################################################
+## -- docker-compose or docker-stack use only --
+###########################################################################
+## -- (this script will include ./.env only if "./docker-run.env" not found
+DOCKER_ENV_FILE="./docker-run.env"
+
+###########################################################################
+#### (Optional - if you want add Environmental Variable for Running Docker)
+###########################################################################
+ENV_VARIABLE_PATTERN=""
+
 ###################################################
 #### ---- Change this only to use your own ----
 ###################################################
@@ -62,26 +73,33 @@ LOCAL_VOLUME_DIR="${baseDataFolder}/${PACKAGE}"
 ## -- Container's internal Volume base DIR
 DOCKER_VOLUME_DIR="/home/developer"
 
+###################################################
+#### ---- Detect Docker Run Env files ----
+###################################################
 
-###################################################
-#### ---- Detect docker ----
-###################################################
-DOCKER_ENV_FILE="./.env"
 function detectDockerEnvFile() {
     curr_dir=`pwd`
-    if [ -s "./.env" ]; then
-        echo "--- INFO: ./.env Docker Environment file (.env) FOUND!"
-        DOCKER_ENV_FILE="./.env"
+    if [ -s "${DOCKER_ENV_FILE}" ]; then
+        echo "--- INFO: Docker Run Environment file '${DOCKER_ENV_FILE}' FOUND!"
     else
-        echo "--- INFO: ./.env Docker Environment file (.env) NOT found!"
-        if [ -s "./docker.env" ]; then
-            DOCKER_ENV_FILE="./docker.env"
+        echo "*** WARNING: Docker Run Environment file '${DOCKER_ENV_FILE}' NOT found!"
+        echo "*** WARNING: Searching for .env or docker.env as alternative!"
+        echo "*** --->"
+        if [ -s "./.env" ]; then
+            echo "--- INFO: ./.env FOUND to use as Docker Run Environment file!"
+            DOCKER_ENV_FILE="./.env"
         else
-            echo "*** WARNING: Docker Environment file (.env) or (docker.env) NOT found!"
+            echo "--- INFO: ./.env Docker Environment file (.env) NOT found!"
+            if [ -s "./docker.env" ]; then
+                echo "--- INFO: ./docker.env FOUND to use as Docker Run Environment file!"
+                DOCKER_ENV_FILE="./docker.env"
+            else
+                echo "*** WARNING: Docker Environment file (.env) or (docker.env) NOT found!"
+            fi
         fi
     fi
 }
-detectDockerEnvFile
+detectDockerRunEnvFile
 
 ###################################################
 #### ---- Function: Generate volume mappings  ----
@@ -180,6 +198,64 @@ generatePortMapping
 echo ${PORT_MAP}
 
 ###################################################
+#### ---- Generate Environment Variables       ----
+###################################################
+ENV_VARS=""
+function generateEnvVars() {
+    ## -- product key patterns, e.g., "^MYSQL_*"
+    #productEnvVars=`grep -E "^[[:blank:]]*$1[a-zA-Z0-9_]+[[:blank:]]*=[[:blank:]]*[a-zA-Z0-9_]+[[:blank:]]*" ${DOCKER_ENV_FILE}`
+    productEnvVars=`grep -E "^[[:blank:]]*$1.+[[:blank:]]*=[[:blank:]]*.+[[:blank:]]*" ${DOCKER_ENV_FILE} | grep -v "^#"`
+    ENV_VARS=""
+    for vars in ${productEnvVars// /}; do
+        echo "Entry => $vars"
+        if [ "$1" != "" ]; then
+            matched=`echo $vars|grep -E "${1}"`
+            if [ ! "$matched" == "" ]; then
+                ENV_VARS="${ENV_VARS} -e ${vars}"
+            fi
+        else
+            ENV_VARS="${ENV_VARS} -e ${vars}"
+        fi
+    done
+}
+generateEnvVars "${ENV_VARIABLE_PATTERN}"
+echo "ENV_VARS="$ENV_VARS
+
+###################################################
+#### ---- Setup Docker Build Proxy ----
+###################################################
+# export NO_PROXY="localhost,127.0.0.1,.openkbs.org"
+# export HTTP_PROXY="http://gatekeeper-w.openkbs.org:80"
+# when using "wget", add "--no-check-certificate" to avoid https certificate checking failures
+# Note: You can also setup Docker CLI configuration file (~/.docker/config.json), e.g.
+# {
+#   "proxies": {
+#     "default": {
+#       "httpProxy": "http://gatekeeper-w.openkbs.org:80"
+#       "httpsProxy": "http://gatekeeper-w.openkbs.org:80"
+#      }
+#    }
+#  }
+#
+echo "... Setup Docker Run Proxy: ..."
+
+PROXY_PARAM=
+function generateProxyEnv() {
+    if [ "${HTTP_PROXY}" != "" ]; then
+        PROXY_PARAM="${PROXY_PARAM} -e HTTP_PROXY=${HTTP_PROXY}"
+    fi
+    if [ "${HTTPS_PROXY}" != "" ]; then
+        PROXY_PARAM="${PROXY_PARAM} -e HTTPS_PROXY=${HTTPS_PROXY}"
+    fi
+    if [ "${NO_PROXY}" != "" ]; then
+        PROXY_PARAM="${PROXY_PARAM} -e NO_PROXY=\"${NO_PROXY}\""
+    fi
+    ENV_VARS="${ENV_VARS} ${PROXY_PARAM}"
+}
+generateProxyEnv
+echo "ENV_VARS=${ENV_VARS}"
+
+###################################################
 #### ---- Function: Generate privilege String  ----
 ####      (Don't change!)
 ###################################################
@@ -218,7 +294,7 @@ function displayURL() {
 }
 
 ###################################################
-#### ---- Replace "Key=Value" withe new value ----
+#### ---- Replace "Key=Value" with new value   ----
 ###################################################
 function replaceKeyValue() {
     inFile=${1:-${DOCKER_ENV_FILE}}
@@ -231,8 +307,29 @@ function replaceKeyValue() {
     sed -i -E 's/^('$keyLike'[[:blank:]]*=[[:blank:]]*).*/\1'$newValue'/' $inFile
 }
 #### ---- Replace docker.env with local user's UID and GID ----
-replaceKeyValue ${DOCKER_ENV_FILE} "USER_ID" "$(id -u $USER)"
-replaceKeyValue ${DOCKER_ENV_FILE} "GROUP_ID" "$(id -g $USER)"
+#replaceKeyValue ${DOCKER_ENV_FILE} "USER_ID" "$(id -u $USER)"
+#replaceKeyValue ${DOCKER_ENV_FILE} "GROUP_ID" "$(id -g $USER)"
+
+###################################################
+#### ---- Get "Key=Value" withe new value ----
+#### Usage: getKeyValuePair <inFile> <key>
+#### Output: Key=Value
+###################################################
+KeyValuePair=""
+function getKeyValuePair() {
+    KeyValuePair=""
+    inFile=${1:-${DOCKER_ENV_FILE}}
+    keyLike=$2
+    if [ "$2" == "" ]; then
+        echo "**** ERROR: Empty Key value! Abort!"
+        exit 1
+    fi
+    matchedKV=`grep -E "^[[:blank:]]*${keyLike}.+[[:blank:]]*=[[:blank:]]*.+[[:blank:]]*" ${DOCKER_ENV_FILE}`
+    for kv in $matchedKV; do
+        echo "KeyValuePair=${matchedKV// /}"
+    done
+}
+#getKeyValuePair "${DOCKER_ENV_FILE}" "MYSQL_DATABASE"
 
 ## -- transform '-' and space to '_' 
 #instanceName=`echo $(basename ${imageTag})|tr '[:upper:]' '[:lower:]'|tr "/\-: " "_"`
@@ -257,9 +354,9 @@ docker run -it \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --user $(id -u $USER) \
+    ${ENV_VARS} \
     ${VOLUME_MAP} \
     ${PORT_MAP} \
     ${imageTag} $*
 
-cleanup
 

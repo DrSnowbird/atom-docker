@@ -1,11 +1,11 @@
 version: '3' 
 services:
-  atom-java-mvn-python3:
-    image: openkbs/atom-java-mvn-python3
+  atom-docker:
+    image: openkbs/atom-docker
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: atom-java-mvn-python3
+    container_name: atom-docker
     environment:
       - USER_ID=${USER_ID:-1000}
       - GROUP_ID=${GROUP_ID:-1000}
@@ -13,6 +13,6 @@ services:
       - ./docker.env
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - ${HOME}/.atom-docker:/home/developer/.atom-docker
-      - ${HOME}/data-docker/atom-java-mvn-python3/workspace:/home/developer/workspace
+      - ./.atom:/home/developer/.atom
+      - ./workspace:/home/developer/workspace
 

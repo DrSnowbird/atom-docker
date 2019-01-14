@@ -4,16 +4,21 @@ MAINTAINER DrSnowbird "DrSnowbird@openkbs.org"
 
 # Release: https://github.com/atom/atom/releases/
 
-## ---- USER_NAME is defined in parent image: openkbs/jdk-mvn-py3-x11 already ----
-ENV USER_NAME=${USER_NAME:-developer}
-ENV HOME=/home/${USER_NAME}
-ARG ATOM_VERSION=${ATOM_VERSION:-v1.30.0}
+## ---- USER is defined in parent image: openkbs/jdk-mvn-py3-x11 already ----
+ENV USER=${USER:-developer}
+ENV HOME=/home/${USER}
+
+###############################
+#### --- Atom Install ---- ####
+###############################
+ARG ATOM_VERSION=${ATOM_VERSION:-v1.34.0}
 ENV ATOM_VERSION=${ATOM_VERSION}
 ENV ATOM_PACKAGE=${ATOM_PACKAGE:-atom-amd64.deb}
 
-#COPY ${ATOM_PACKAGE} /tmp/
-RUN sudo apt-get update && \
-    sudo apt-get install -y --no-install-recommends \
+user 0
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     ca-certificates \
     fakeroot \
     gconf2 \
@@ -28,21 +33,36 @@ RUN sudo apt-get update && \
     libxkbfile1 \
     libxss1 \
     libxtst6 \
+    libcurl3 \
     xdg-utils && \
     curl -L https://github.com/atom/atom/releases/download/${ATOM_VERSION}/${ATOM_PACKAGE} > /tmp/${ATOM_PACKAGE} && \
-    sudo dpkg -i /tmp/${ATOM_PACKAGE} && \
+    dpkg -i /tmp/${ATOM_PACKAGE} && \
     rm -f /tmp/${ATOM_PACKAGE} && \
-    sudo useradd -d /home/atom -m atom
+    useradd -d /home/atom -m atom
 
-USER ${USER_NAME}
+#############################################
+#### --- Atom add-on plugin Install ---- ####
+#############################################
+RUN apm install language-docker atom-django
+
+###########################################
+#### --- Enterpoint for container ---- ####
+###########################################
+USER ${USER}
 WORKDIR ${HOME}
 
-RUN \
-    mkdir -p ${HOME}/workspace  && \
-    apm install language-docker atom-django
+ENV DATA=${HOME}/data
+ENV WORKSPACE=${HOME}/workspace
+RUN mkdir -p ${WORKSPACE} ${DATA}
 
-VOLUME ${HOME}/workspace
+VOLUME ${DATA}
+VOLUME ${WORKSPACE}
 VOLUME ${HOME}/.atom 
 
 CMD ["/usr/bin/atom","-f"]
+
+#### (debug only)
+#CMD ["/usr/bin/firefox"]
+#CMD ["/bin/bash"]
+
 
